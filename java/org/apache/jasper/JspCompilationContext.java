@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.jar.JarEntry;
 
@@ -610,7 +611,8 @@ public class JspCompilationContext {
                 throw fnfe;
             } catch (Exception ex) {
                 JasperException je = new JasperException(
-                        Localizer.getMessage("jsp.error.unable.compile"),
+                    // tanmw.top 修改页面日志乱码
+                        new String(Localizer.getMessage("jsp.error.unable.compile").getBytes(StandardCharsets.ISO_8859_1),StandardCharsets.UTF_8),
                         ex);
                 // Cache compilation exception
                 jsw.setCompilationException(je);
