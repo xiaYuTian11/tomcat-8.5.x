@@ -16,14 +16,9 @@
  */
 package org.apache.tomcat.util.res;
 
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * An internationalization / localization helper class which reduces
@@ -58,7 +53,6 @@ public class StringManager {
      */
     private final ResourceBundle bundle;
     private final Locale locale;
-
 
     /**
      * Creates a new StringManager for a given package. This is a
@@ -107,20 +101,17 @@ public class StringManager {
         }
     }
 
-
     /**
      * Get a string from the underlying resource bundle or return null if the
      * String is not found.
      *
      * @param key to desired resource String
-     *
      * @return resource String matching <i>key</i> from underlying bundle or
-     *         null if not found.
-     *
+     * null if not found.
      * @throws IllegalArgumentException if <i>key</i> is null
      */
     public String getString(String key) {
-        if (key == null){
+        if (key == null) {
             String msg = "key may not have a null value";
             throw new IllegalArgumentException(msg);
         }
@@ -130,7 +121,8 @@ public class StringManager {
         try {
             // Avoid NPE if bundle is null and treat it like an MRE
             if (bundle != null) {
-                str = bundle.getString(key);
+                // tanmw.top 处理console日志打印乱码
+                str = new String(bundle.getString(key).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
             }
         } catch (MissingResourceException mre) {
             //bad: shouldn't mask an exception the following way:
@@ -150,16 +142,14 @@ public class StringManager {
         return str;
     }
 
-
     /**
      * Get a string from the underlying resource bundle and format
      * it with the given set of arguments.
      *
      * @param key  The key for the required message
      * @param args The values to insert into the message
-     *
      * @return The request string formatted with the provided arguments or the
-     *         key if the key was not found.
+     * key if the key was not found.
      */
     public String getString(final String key, final Object... args) {
         String value = getString(key);
@@ -172,7 +162,6 @@ public class StringManager {
         return mf.format(args, new StringBuffer(), null).toString();
     }
 
-
     /**
      * Identify the Locale this StringManager is associated with.
      *
@@ -182,14 +171,12 @@ public class StringManager {
         return locale;
     }
 
-
     // --------------------------------------------------------------
     // STATIC SUPPORT METHODS
     // --------------------------------------------------------------
 
-    private static final Map<String, Map<Locale,StringManager>> managers =
-            new Hashtable<>();
-
+    private static final Map<String, Map<Locale, StringManager>> managers =
+        new Hashtable<>();
 
     /**
      * Get the StringManager for a given class. The StringManager will be
@@ -198,13 +185,11 @@ public class StringManager {
      * StringManager will be created and returned.
      *
      * @param clazz The class for which to retrieve the StringManager
-     *
      * @return The instance associated with the package of the provide class
      */
     public static final StringManager getManager(Class<?> clazz) {
         return getManager(clazz.getPackage().getName());
     }
-
 
     /**
      * Get the StringManager for a particular package. If a manager for
@@ -212,14 +197,12 @@ public class StringManager {
      * StringManager will be created and returned.
      *
      * @param packageName The package name
-     *
      * @return The instance associated with the given package and the default
-     *         Locale
+     * Locale
      */
     public static final StringManager getManager(String packageName) {
         return getManager(packageName, Locale.getDefault());
     }
-
 
     /**
      * Get the StringManager for a particular package and Locale. If a manager
@@ -228,13 +211,12 @@ public class StringManager {
      *
      * @param packageName The package name
      * @param locale      The Locale
-     *
      * @return The instance associated with the given package and Locale
      */
     public static final synchronized StringManager getManager(
-            String packageName, Locale locale) {
+        String packageName, Locale locale) {
 
-        Map<Locale,StringManager> map = managers.get(packageName);
+        Map<Locale, StringManager> map = managers.get(packageName);
         if (map == null) {
             /*
              * Don't want the HashMap to be expanded beyond LOCALE_CACHE_SIZE.
@@ -244,11 +226,12 @@ public class StringManager {
              * for removal needs to use one less than the maximum desired size
              *
              */
-            map = new LinkedHashMap<Locale,StringManager>(LOCALE_CACHE_SIZE, 1, true) {
+            map = new LinkedHashMap<Locale, StringManager>(LOCALE_CACHE_SIZE, 1, true) {
                 private static final long serialVersionUID = 1L;
+
                 @Override
                 protected boolean removeEldestEntry(
-                        Map.Entry<Locale,StringManager> eldest) {
+                    Map.Entry<Locale, StringManager> eldest) {
                     if (size() > (LOCALE_CACHE_SIZE - 1)) {
                         return true;
                     }
@@ -266,7 +249,6 @@ public class StringManager {
         return mgr;
     }
 
-
     /**
      * Retrieve the StringManager for a list of Locales. The first StringManager
      * found will be returned.
@@ -274,11 +256,10 @@ public class StringManager {
      * @param packageName      The package for which the StringManager was
      *                         requested
      * @param requestedLocales The list of Locales
-     *
      * @return the found StringManager or the default StringManager
      */
     public static StringManager getManager(String packageName,
-            Enumeration<Locale> requestedLocales) {
+                                           Enumeration<Locale> requestedLocales) {
         while (requestedLocales.hasMoreElements()) {
             Locale locale = requestedLocales.nextElement();
             StringManager result = getManager(packageName, locale);

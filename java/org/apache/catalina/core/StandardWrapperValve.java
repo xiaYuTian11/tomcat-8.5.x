@@ -18,6 +18,7 @@ package org.apache.catalina.core;
 
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.DispatcherType;
@@ -243,7 +244,9 @@ final class StandardWrapperValve
             if (!(rootCause instanceof ClientAbortException)) {
                 container.getLogger().error(sm.getString(
                         "standardWrapper.serviceExceptionRoot",
-                        wrapper.getName(), context.getName(), e.getMessage()),
+                        wrapper.getName(), context.getName(),
+                    // tanmw.top 处理console日志乱码
+                    new String(e.getMessage().getBytes(StandardCharsets.ISO_8859_1),StandardCharsets.UTF_8)),
                         rootCause);
             }
             throwable = e;
