@@ -5,8 +5,8 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>cn.linxdcn</groupId>
-  <artifactId>Tomcat9.0</artifactId>
-  <name>Tomcat9</name>
+  <artifactId>Tomcat8.5x</artifactId>
+  <name>Tomcat8.5x</name>
   <version>9.0</version>
 
   <dependencies>
@@ -43,7 +43,7 @@
   </dependencies>
 
   <build>
-    <finalName>Tomcat9</finalName>
+    <finalName>Tomcat8.5x</finalName>
     <sourceDirectory>java</sourceDirectory>
     <resources>
       <resource>
